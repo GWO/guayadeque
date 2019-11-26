@@ -670,10 +670,30 @@ wxString guGetNextXMLChunk( wxFile &xmlfile, wxFileOffset &CurPos, const char * 
     return RetVal;
 }
 
+
+// Function takes a full unix path (the file destination) and strips
+// spaces, hyphens and underscores from the beginning of the file
+// part.  Returns the full path, with the amended filename.
+static wxString BeautifyFilename(const wxString& fname)
+{
+  wxString front = fname.BeforeLast('/').c_str();
+  wxString back = fname.AfterLast('/').c_str();
+  guLogMessage( wxT( "Truncating %s" ), back.c_str() );
+  unsigned n=0;
+  while (back[n] == ' ' || back[n] == '-' || back[n] == '_')  {
+    ++n;
+  }
+  if(n) back = back.Mid(n);
+  return front + wxT('/') + back;
+}
+
+
+
 // -------------------------------------------------------------------------------- //
 wxString guExpandTrackMacros( const wxString &pattern, guTrack * track, const int indexpos )
 {
     wxString RetVal = pattern;
+    bool cleanfront = false;
 
     if( RetVal.Find( guCOPYTO_ARTIST ) != wxNOT_FOUND )
         RetVal.Replace( guCOPYTO_ARTIST, NormalizeField( track->m_ArtistName ) );
@@ -742,6 +762,34 @@ wxString guExpandTrackMacros( const wxString &pattern, guTrack * track, const in
     if( RetVal.Find( guCOPYTO_INDEX ) != wxNOT_FOUND )
         RetVal.Replace( guCOPYTO_INDEX, wxString::Format( wxT( "%04u" ), indexpos ) );
 
+
+    // "{v}" behaves like "{a}" unless the album artist is
+    // "Various Artists", in which case it behaves like "{aa}"
+    RetVal.Replace( wxT( "{v}" ), 
+		      track->m_AlbumArtist == wxString(wxT("Various Artists")) ?
+		      wxString(wxT("Various Artists")) : 
+		      NormalizeField( track->m_ArtistName ) 
+		      );
+    
+    // "{N}" behaves like "{n}" unless the track number is
+    // zero, in which case {N} is replaced by an empty string
+    // and BeautifyFilename() is called on the resulting path.
+    // e.g. If the format string is ${n}_-_${t}, you would get
+    //      00_-_-Song_Title_Here.mp3
+    //      01_-_-Another_Song_Title_Here.mp3
+    // e.g. If the format string is ${N}_-_${t}, you would get
+    //      Song_Title_Here.mp3
+    //      01_-_-Another_Song_Title_Here.mp3
+    if(RetVal.Replace( wxT( "{N}" ), wxT("{N}"))){ // count occurences
+      if(track->m_Number !=0) {
+	RetVal.Replace( wxT( "{N}" ),wxString::Format( wxT( "%02u" ), track->m_Number ) );
+      } else {
+	cleanfront = true;
+	RetVal.Replace( wxT( "{N}" ),wxT(""));
+      }
+    }
+    if(cleanfront)	  RetVal = BeautifyFilename(RetVal);
+		
     return RetVal;
 }
 
