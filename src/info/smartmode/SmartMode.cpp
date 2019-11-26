@@ -249,8 +249,12 @@ int guSmartModeThread::AddSimilarTracks( const wxString &artist, const wxString 
             double Match = MatchStr2Double( SimilarTracks[ Index ].m_Match );
             //guLogMessage( wxT( "Match: %f" ), Match );
             if( Match >= guSMARTMODE_MIN_TRACK_MATCH )
-            {
-                CheckAddTrack( SimilarTracks[ Index ].m_ArtistName, SimilarTracks[ Index ].m_TrackName, &FoundTracks );
+              {
+                if(CheckAddTrack( SimilarTracks[ Index ].m_ArtistName, SimilarTracks[ Index ].m_TrackName, &FoundTracks )) {
+                  guLogMessage( wxT( "Similar Track: %s - %s accepted" ), 
+                                SimilarTracks[ Index ].m_ArtistName.c_str(), 
+                                SimilarTracks[ Index ].m_TrackName.c_str());
+                }
             }
             else    // Results comes sorted by match
             {
@@ -261,42 +265,86 @@ int guSmartModeThread::AddSimilarTracks( const wxString &artist, const wxString 
                 break;
         }
     }
-
-    if( FoundTracks.Count() < 4 )
-    {
+    
+    int Valid_Matches = 0, SmartTracks = FoundTracks.Count();
+    if( FoundTracks.Count() < 12 )
+      {
         guSimilarArtistInfoArray SimilarArtists = m_LastFM->ArtistGetSimilar( artist );
         int Index;
         int Count = SimilarArtists.Count();
-        for( Index = 0; Index < Count; Index++ )
+	for( Index = 0; Index < Count; Index++ )
         {
             if( !m_SmartAddedArtists || ( m_SmartAddedArtists->Index( SimilarArtists[ Index ].m_Name.Upper() ) == wxNOT_FOUND ) )
             {
                 double Match = MatchStr2Double( SimilarArtists[ Index ].m_Match );
-                if( Match >= guSMARTMODE_MIN_ARTIST_MATCH )
+                if( Match >= guSMARTMODE_MIN_ARTIST_MATCH || Valid_Matches < 8)
                 {
                     if( m_Db->GetArtistId( SimilarArtists[ Index ].m_Name, false ) != wxNOT_FOUND )
                     {
-                        //guLogMessage( wxT( "Found similar artist: '%s'" ), SimilarArtists[ Index ].m_Name.c_str() );
-                        guTopTrackInfoArray ArtistTopTracks = m_LastFM->ArtistGetTopTracks( SimilarArtists[ Index ].m_Name );
+                      guLogMessage( wxT( "Found similar artist: '%s' - match %f" ), SimilarArtists[ Index ].m_Name.c_str(),Match);
+                      {
                         int TTIndex;
+
+#if 0
+                        guTopTrackInfoArray ArtistTopTracks = m_LastFM->ArtistGetTopTracks( SimilarArtists[ Index ].m_Name );
                         int TTCount = ArtistTopTracks.Count();
+                        bool TTadded = false;
                         for( TTIndex = 0; TTIndex < TTCount; TTIndex++ )
                         {
-                            if( TestDestroy() ||
-                                CheckAddTrack( ArtistTopTracks[ TTIndex ].m_ArtistName, ArtistTopTracks[ TTIndex ].m_TrackName, &FoundTracks ) )
-                                break;
+                          // guLogMessage( wxT( "Top track: '%s'" ), ArtistTopTracks[ TTIndex ].m_TrackName.c_str());
+                          if( TestDestroy()) break;
+                          TTadded = CheckAddTrack( ArtistTopTracks[ TTIndex ].m_ArtistName, ArtistTopTracks[ TTIndex ].m_TrackName, &FoundTracks );
+                          if(TTadded) {
+                            guLogMessage( wxT( "Top track added: '%s'" ), ArtistTopTracks[ TTIndex ].m_TrackName.c_str());
+                            break;
+                          }
                         }
+#endif
+                        int track_accepted = 0;
+                        if(true) {
+                          guTrackArray artists_songs;
+                          wxArrayInt Artist;
+                          Artist.Add(m_Db->GetArtistId(SimilarArtists[Index].m_Name,false));
+                          m_Db->GetArtistsSongs(Artist,&artists_songs);
+                          // guLogMessage( wxT( "SmartMode: %d tracks in DB for %s" ), ct, SimilarArtists[Index].m_Name.c_str());
+                          for( TTIndex = 0; TTIndex < (int)artists_songs.Count(); TTIndex++ ){
+                            if(TestDestroy()) break;
+                            if(CheckAddTrack( artists_songs[ TTIndex ].m_ArtistName, artists_songs[ TTIndex ].m_SongName, &FoundTracks )){
+                              guLogMessage( wxT( "SmartMode: %s - %s accepted" ), 
+                                            artists_songs[ TTIndex ].m_ArtistName.c_str(), 
+                                            artists_songs[ TTIndex ].m_SongName.c_str());
+                              track_accepted = 1;
+                            } 
+                          }
+                        }
+                        if(track_accepted) {
+                          ++Valid_Matches;
+                        }else {
+                          // guLogMessage( wxT( "SmartMode: no songs for %s accepted"),SimilarArtists[ Index ].m_Name.c_str());
+                        }
+                      }
                     }
                 }
                 else
                 {
                     break;
                 }
+            } else {
+              guLogMessage(wxT( "Similar artist '%s' in Recent List" ),SimilarArtists[ Index ].m_Name.c_str());
             }
             if( TestDestroy() )
                 break;
         }
     }
+
+    if(SmartTracks > 0) {
+      guLogMessage( wxT( "SmartMode: %d tracks - %d similar tracks and %d similar artists" ), FoundTracks.Count(), SmartTracks, Valid_Matches);
+    } else {
+      guLogMessage( wxT( "SmartMode: %d tracks by %d artists" ), FoundTracks.Count(),Valid_Matches);
+    }
+    // for(unsigned i=0;i < FoundTracks.Count();++i) {
+    // guLogMessage( wxT( "SmartMode: %s:%s" ), FoundTracks[i].m_SongName.c_str(),FoundTracks[i].m_ArtistName.c_str());
+    //}
 
     // Select some random tracks from the available
     while( !TestDestroy() && FoundTracks.Count() )
