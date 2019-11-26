@@ -917,7 +917,7 @@ bool guRadioPanel::DoTextSearch( void )
 // -------------------------------------------------------------------------------- //
 void guRadioPanel::OnTextChangedTimer( wxTimerEvent &event )
 {
-    guLogMessage( wxT( "OnTextChangedTimer..." ) );
+  // guLogMessage( wxT( "OnTextChangedTimer..." ) );
     DoTextSearch();
 }
 

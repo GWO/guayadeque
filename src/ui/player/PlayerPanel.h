@@ -130,7 +130,7 @@ class guCurrentTrack : public guTrack
         m_PlayTime = 0;
         m_ASRating = guAS_RATING_NONE;
         m_MediaViewer = Src.m_MediaViewer;
-        guLogMessage( wxT( "Track starts at %i with length %i" ), m_Offset, m_Length );
+        // guLogMessage( wxT( "Track starts at %i with length %i" ), m_Offset, m_Length );
 
         //CoverType = GU_SONGCOVER_NONE;
         if( m_Type == guTRACK_TYPE_RADIOSTATION )
@@ -367,7 +367,8 @@ class guPlayerPanel : public wxPanel
     void                        OnArtistNameDClicked( wxMouseEvent &event );
     void                        OnYearDClicked( wxMouseEvent &event );
     void                        OnTimeDClicked( wxMouseEvent &event ) { m_ShowRevTime = !m_ShowRevTime;
-                                                                UpdatePositionLabel( GetPosition() ); }
+      guLogMessage(wxT("OnTimeDClicked"));
+      UpdatePositionLabel( GetPosition() ); };
     void                        OnRatingChanged( guRatingEvent &event );
     void                        CheckFiltersEnable( void );
 

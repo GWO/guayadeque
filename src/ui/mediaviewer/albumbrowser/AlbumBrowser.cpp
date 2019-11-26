@@ -339,14 +339,6 @@ void guAlbumBrowserItemPanel::OnContextMenu( wxContextMenuEvent &event )
     {
         int ContextMenuFlags = m_AlbumBrowser->GetContextMenuFlags();
 
-        MenuItem = new wxMenuItem( &Menu, ID_ALBUMBROWSER_PLAY, _( "Play" ), _( "Play the album tracks" ) );
-        MenuItem->SetBitmap( guImage( guIMAGE_INDEX_player_tiny_light_play ) );
-        Menu.Append( MenuItem );
-
-        MenuItem = new wxMenuItem( &Menu, ID_ALBUMBROWSER_ENQUEUE_AFTER_ALL, _( "Enqueue" ), _( "Enqueue the album tracks to the playlist" ) );
-        MenuItem->SetBitmap( guImage( guIMAGE_INDEX_tiny_add ) );
-        Menu.Append( MenuItem );
-
         wxMenu * EnqueueMenu = new wxMenu();
 
         MenuItem = new wxMenuItem( EnqueueMenu, ID_ALBUMBROWSER_ENQUEUE_AFTER_TRACK,
@@ -368,6 +360,14 @@ void guAlbumBrowserItemPanel::OnContextMenu( wxContextMenuEvent &event )
         EnqueueMenu->Append( MenuItem );
 
         Menu.Append( wxID_ANY, _( "Enqueue After" ), EnqueueMenu );
+
+        MenuItem = new wxMenuItem( &Menu, ID_ALBUMBROWSER_PLAY, _( "Play" ), _( "Play the album tracks" ) );
+        MenuItem->SetBitmap( guImage( guIMAGE_INDEX_player_tiny_light_play ) );
+        Menu.Append( MenuItem );
+
+        MenuItem = new wxMenuItem( &Menu, ID_ALBUMBROWSER_ENQUEUE_AFTER_ALL, _( "Enqueue" ), _( "Enqueue the album tracks to the playlist" ) );
+        MenuItem->SetBitmap( guImage( guIMAGE_INDEX_tiny_add ) );
+        Menu.Append( MenuItem );
 
         Menu.AppendSeparator();
 

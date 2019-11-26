@@ -914,8 +914,8 @@ void guPrefDialog::BuildPlaybackPage( void )
 	SmartPlayFilterLabel->Wrap( -1 );
 	SmartPlayFilterSizer->Add( SmartPlayFilterLabel, 0, wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
 
-	m_SmartPlayArtistsSpinCtrl = new wxSpinCtrl( m_PlayPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 50, 20 );
-    m_SmartPlayArtistsSpinCtrl->SetValue( m_Config->ReadNum( CONFIG_KEY_PLAYBACK_SMART_FILTER_ARTISTS, 20, CONFIG_PATH_PLAYBACK ) );
+	m_SmartPlayArtistsSpinCtrl = new wxSpinCtrl( m_PlayPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), wxSP_ARROW_KEYS, 0, 200, 20 );
+	m_SmartPlayArtistsSpinCtrl->SetValue( m_Config->ReadNum( CONFIG_KEY_PLAYBACK_SMART_FILTER_ARTISTS, 20, CONFIG_PATH_PLAYBACK ) );
 	SmartPlayFilterSizer->Add( m_SmartPlayArtistsSpinCtrl, 0, wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT, 5 );
 
 	wxStaticText * SmartPlayArtistLabel = new wxStaticText( m_PlayPanel, wxID_ANY, _("artists or"), wxDefaultPosition, wxDefaultSize, 0 );

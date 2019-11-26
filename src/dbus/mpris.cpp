@@ -913,7 +913,7 @@ void guMPRIS::OnPlayerStatusChange()
         int PlaySingle = ( m_PlayerPanel->GetPlayMode() == guPLAYER_PLAYMODE_REPEAT_TRACK );
         int PlayLoop = ( m_PlayerPanel->GetPlayMode() == guPLAYER_PLAYMODE_REPEAT_PLAYLIST );
 
-        guLogMessage( wxT( "StatusChanged( %i, %i, %i, %i )" ), PlayStatus, Dummy, Dummy, PlayLoop );
+        // guLogMessage( wxT( "StatusChanged( %i, %i, %i, %i )" ), PlayStatus, Dummy, Dummy, PlayLoop );
 
         DBusMessageIter status;
         DBusMessageIter args;

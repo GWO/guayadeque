@@ -730,11 +730,12 @@ void guPlayerPanel::UpdatePositionLabel( const unsigned int curpos )
         // To avoid weird time less results we check if the length of the track is
         // bigger than the current pos.
         //if( curpos > m_MediaSong.m_Length )
-        if( curpos > CurLen )
-            //Label = wxT( "-" ) + LenToString( m_MediaSong.m_Length );
-            Label = wxT( "-" ) + LenToString( CurLen );
-        else
-            Label = wxT( "-" ) + LenToString( CurLen - curpos );
+      if( curpos > CurLen ){
+        Label = wxT( "-" ) + LenToString( m_MediaSong.m_Length );
+        Label = wxT( "-" ) + LenToString( CurLen );
+      } else {
+        Label = wxT( "-" ) + LenToString( CurLen - curpos );
+      }
     }
 
     //if( m_MediaSong.m_Length )
@@ -1213,7 +1214,6 @@ void guPlayerPanel::OnSmartAddTracks( wxCommandEvent &event )
     guTrackArray * Tracks = ( guTrackArray * ) event.GetClientData();
     if( Tracks )
     {
-        //guLogMessage( wxT( "Tracks %i" ), Tracks->Count() );
         if( Tracks->Count() )
         {
             AddToPlayList( * Tracks );
@@ -1612,7 +1612,6 @@ void  guPlayerPanel::OnMediaPosition( guMediaEvent &event )
 
         if( m_TrackChanged )
             m_TrackChanged = false;
-
         UpdatePositionLabel( CurPos );
 
         if( m_LastLength )
@@ -1664,7 +1663,6 @@ void  guPlayerPanel::OnMediaLength( guMediaEvent &event )
     if( CurLen != m_LastLength )
     {
         m_LastLength = CurLen;
-
         UpdatePositionLabel( m_LastCurPos );
         m_MediaSong.m_Length = CurLen;
     }
@@ -2027,8 +2025,6 @@ void guPlayerPanel::UpdateCover( const bool shownotify, const bool deleted )
 //        m_UpdateCoverThread->Pause();
 //        m_UpdateCoverThread->Delete();
 //    }
-
-    //guLogMessage( wxT( "UpdateCover: '%s'  /// '%s'  %i" ), m_MediaSong.m_ArtistName.c_str(), m_MediaSong.m_AlbumName.c_str(), deleted );
 
     guUpdatePlayerCoverThread * UpdateCoverThread = new guUpdatePlayerCoverThread( m_Db, m_MainFrame, this, &m_MediaSong, shownotify, deleted );
     if( !UpdateCoverThread )

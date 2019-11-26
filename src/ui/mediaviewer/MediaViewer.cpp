@@ -427,7 +427,7 @@ bool guMediaViewer::CreatePlayListView( void )
 // -------------------------------------------------------------------------------- //
 void guMediaViewer::SetViewMode( const int mode )
 {
-    guLogMessage( wxT( "SetViewMode %i => %i" ), m_ViewMode, mode );
+  // guLogMessage( wxT( "SetViewMode %i => %i" ), m_ViewMode, mode );
     if( mode != m_ViewMode )
     {
         Freeze();
@@ -715,7 +715,7 @@ void guMediaViewer::OnSearchActivated( wxCommandEvent& event )
 // -------------------------------------------------------------------------------- //
 void guMediaViewer::OnSearchCancelled( wxCommandEvent &event ) // CLEAN SEARCH STR
 {
-    guLogMessage( wxT( "OnSearchCancelled..." ) );
+  // guLogMessage( wxT( "OnSearchCancelled..." ) );
 
     m_SearchTextCtrl->Clear();
     m_SearchText.Empty();
@@ -765,7 +765,7 @@ void guMediaViewer::GoToSearch( void )
 // -------------------------------------------------------------------------------- //
 void guMediaViewer::OnTextChangedTimer( wxTimerEvent &event )
 {
-    guLogMessage( wxT( "OnTextChangedTimer..." ) );
+  // guLogMessage( wxT( "OnTextChangedTimer..." ) );
     m_SearchText = m_SearchTextCtrl->GetLineText( 0 );
     DoTextSearch();
 }
