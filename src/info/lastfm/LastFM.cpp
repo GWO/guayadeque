@@ -803,6 +803,8 @@ guSimilarArtistInfoArray guLastFM::ArtistGetSimilar( const wxString &Artist )
     wxString                    ImageSize;
     wxString                    Tags = wxEmptyString;
 
+    guLogMessage( wxT( "LastFM::ArtistGetSimilar:%s" ),Artist.c_str() );
+
     Req.SetMethod( wxT( "artist.getsimilar" ) );
     Req.AddArgument( wxT( "api_key" ), LASTFM_API_KEY );
     Req.AddArgument( wxT( "artist" ), Artist, true );
@@ -891,6 +893,13 @@ guSimilarArtistInfoArray guLastFM::ArtistGetSimilar( const wxString &Artist )
             }
         }
     }
+    
+    /*
+    for(unsigned i=0;i<RetVal.GetCount();++i) {
+    guLogMessage( wxT( "LastFM::ArtistGetSimilar:%s" ),RetVal[i].m_Name.c_str() );
+    } 
+    if(RetVal.GetCount() == 0) guLogMessage( wxT( "LastFM::ArtistGetSimilar:No Results\n" ));
+    */
     return RetVal;
 }
 
@@ -1578,7 +1587,7 @@ guSimilarTrackInfoArray guLastFM::TrackGetSimilar( const wxString &Artist, const
     wxString Status;
     wxString ImageSize;
     guSimilarTrackInfoArray RetVal;
-
+    guLogMessage( wxT( "LastFM::TrackGetSimilar:%s - %s" ),Artist.c_str(),Track.c_str() );
     Req.SetMethod( wxT( "track.getsimilar" ) );
     Req.AddArgument( wxT( "api_key" ), LASTFM_API_KEY );
     Req.AddArgument( wxT( "artist" ), Artist, true );
@@ -1672,6 +1681,13 @@ guSimilarTrackInfoArray guLastFM::TrackGetSimilar( const wxString &Artist, const
             }
         }
     }
+    /*
+    for(unsigned i=0;i<RetVal.GetCount();++i) {
+      guLogMessage( wxT( "LastFM::TrackGetSimilar:%s:%s:" ),RetVal[i].m_TrackName.c_str(),RetVal[i].m_ArtistName.c_str() );
+    } 
+    */
+    if(RetVal.GetCount() == 0) guLogMessage( wxT( "LastFM::TrackGetSimilar:No Results" ));
+    
     return RetVal;
 }
 
