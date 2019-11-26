@@ -1563,6 +1563,94 @@ void guLibPanel::OnSongSetField( wxCommandEvent &event )
     m_MediaViewer->UpdatedTracks( guUPDATED_TRACKS_NONE, &Tracks );
 }
 
+static void propose_extra_aa_items(const guTrackArray& Tracks,wxArrayString& Items)
+{
+  int Count = Tracks.Count();
+  for(int Index = 0; Index < Count; Index++ ) {
+    // guTrack * Track = &Tracks[ Index ];
+    wxString aname = Tracks[Index].m_ArtistName;
+    wxString extra = aname;
+    if( Items.Index( extra ) == wxNOT_FOUND ) Items.Add(extra);
+    // Items.Add(aname.Mid(0,4));
+    if(aname.Len() > 4 && aname.Mid(0,4) == wxT("The ")){
+      extra = aname.Mid(4);
+      if( Items.Index(extra) == wxNOT_FOUND ) Items.Add(extra);
+      extra += wxT(", The");
+      if( Items.Index(extra) == wxNOT_FOUND ) Items.Add(extra);
+    }  
+     
+    int first_space = aname.Find(wxChar(' '));
+    if(first_space != wxNOT_FOUND && 
+       first_space != 0 &&
+       first_space+1 != (int)aname.Len() &&
+       first_space == aname.Find(' ',true))
+      {
+	extra = aname.Mid(first_space+1) + wxT(", ") + aname.Mid(0,first_space);
+	if( Items.Index(extra) == wxNOT_FOUND ) Items.Add(extra);
+      }
+  }
+  if( Items.Index(wxT("Various Artists")) == wxNOT_FOUND ) Items.Add(wxT("Various Artists"));
+  while(Items.Index(wxT("")) != wxNOT_FOUND) Items.Remove(wxT(""));
+  
+}
+
+
+static void populate_menu_items(const guTrackArray& Tracks, int ColumnId,wxArrayString& Items)
+{
+  int Index;
+  int Count = Tracks.Count();
+  for( Index = 0; Index < Count; Index++ )
+    {
+      wxVariant Value;
+      guTrack * Track = &Tracks[ Index ];
+
+      switch( ColumnId )
+        {
+	case guSONGS_COLUMN_NUMBER :
+	  Value = ( long ) Track->m_Number;
+	  break;
+
+	case guSONGS_COLUMN_TITLE :
+	  Value = Track->m_SongName;
+	  break;
+
+	case guSONGS_COLUMN_ARTIST :
+	  Value = Track->m_ArtistName;
+	  break;
+
+	case guSONGS_COLUMN_ALBUMARTIST :
+	  Value = Track->m_AlbumArtist;
+	  break;
+
+	case guSONGS_COLUMN_ALBUM :
+	  Value = Track->m_AlbumName;
+	  break;
+
+	case guSONGS_COLUMN_GENRE :
+	  Value = Track->m_GenreName;
+	  break;
+
+	case guSONGS_COLUMN_COMPOSER :
+	  Value = Track->m_Composer;
+	  break;
+
+	case guSONGS_COLUMN_DISK :
+	  Value = Track->m_Disk;
+	  break;
+
+	case guSONGS_COLUMN_YEAR :
+	  Value = ( long ) Track->m_Year;
+	  break;
+        }
+      if( Items.Index( Value.GetString() ) == wxNOT_FOUND )
+	Items.Add( Value.GetString() );
+    }
+  if(ColumnId == guSONGS_COLUMN_ALBUMARTIST){
+    propose_extra_aa_items(Tracks,Items);
+  }
+}
+
+
 // -------------------------------------------------------------------------------- //
 void guLibPanel::OnSongEditField( wxCommandEvent &event )
 {
@@ -1577,6 +1665,7 @@ void guLibPanel::OnSongEditField( wxCommandEvent &event )
 
     wxArrayString Items;
 
+    populate_menu_items(Tracks,ColumnId,Items);
     int Count = Tracks.Count();
     for( int Index = 0; Index < Count; Index++ )
     {
@@ -1627,6 +1716,7 @@ void guLibPanel::OnSongEditField( wxCommandEvent &event )
         if( Items.Index( Value.GetString() ) == wxNOT_FOUND )
             Items.Add( Value.GetString() );
     }
+
 
     guEditWithOptions * FieldEditor = new guEditWithOptions( this, _( "Field Editor" ), Label, DefValue.GetString(), Items );
 
