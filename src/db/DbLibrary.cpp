@@ -2916,8 +2916,9 @@ void guDbLibrary::GetAlbums( guAlbumItems * Albums, bool FullList )
             break;
 
         case guALBUMS_ORDER_ARTIST_YEAR :
-            query += wxT( "coalesce(nullif(song_albumartist,''),song_artist) COLLATE NOCASE, song_year, song_album, song_disk" );
-            break;
+	  query += wxT( "coalesce(nullif(song_albumartist,''),song_artist) COLLATE NOCASE , song_year, song_album, song_disk" );
+	  // query += wxT( "song_albumartist, song_year, song_disk, GROUP BY song_album" );
+	  break;
 
         case guALBUMS_ORDER_ARTIST_YEAR_REVERSE :
         default :
@@ -5120,7 +5121,7 @@ wxString GetSongsSortSQL( const int order, const bool orderdesc )
   wxString query = wxT( " ORDER BY " );
   //
   switch( order )
-  {
+    {
     case guTRACKS_ORDER_TITLE :
       query += wxT( "song_name" );
       break;
@@ -5209,7 +5210,7 @@ wxString GetSongsSortSQL( const int order, const bool orderdesc )
 
     case guTRACKS_ORDER_ARTIST :
     case guTRACKS_ORDER_ALBUMARTIST :
-      query += wxT( ",song_album,song_disk,song_albumid,song_number " );
+      query += wxT( ",song_year,song_album,song_disk,song_albumid,song_number " );
       break;
 
     case guTRACKS_ORDER_ALBUM :
