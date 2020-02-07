@@ -28,7 +28,7 @@
 
 #include <wx/tokenzr.h>
 #include <wx/arrimpl.cpp>
-
+#include <sys/wait.h>
 namespace Guayadeque {
 
 WX_DEFINE_OBJARRAY( guCopyToActionArray )
@@ -254,6 +254,30 @@ void guCopyToThread::AddAction( wxString * playlistpath, guMediaViewer * mediavi
     }
 }
 
+bool guCopyWithGio( const wxString &from, const wxString &to )
+{
+  bool RetVal = false;
+  pid_t pid = fork();
+  if(pid != -1){
+    if(pid > 0){
+      int status;
+      waitpid(pid,&status,0);
+      if(status != 0) guLogError( wxT( "Exec failed with error %d" ), status);
+      else RetVal = true;
+    } else {
+      const std::string gio = "/usr/bin/gio";
+      const char* const exec[] = {gio.c_str(),"copy",from.c_str(),to.c_str(),NULL};
+      guLogError( wxT( "Trying %s %s %s %s" ), exec[0],exec[1],exec[2],exec[3]);
+      execvp(gio.c_str(),(char *const*) exec);
+      exit(1);
+    }
+  } else {
+    guLogError( wxT( "fork() failed"));
+  }
+  return RetVal;
+}
+
+
 // -------------------------------------------------------------------------------- //
 bool guCopyToThread::CopyFile( const wxString &from, const wxString &to )
 {
@@ -265,6 +289,7 @@ bool guCopyToThread::CopyFile( const wxString &from, const wxString &to )
         {
             RetVal = false;
             guLogError( wxT( "Could not copy the file '%s'" ), from.c_str() );
+	    guCopyWithGio(from,to);
         }
     }
     else
@@ -620,7 +645,7 @@ void guCopyToThread::DoCopyToAction( guCopyToAction &copytoaction )
                     //guLogMessage( wxT( "COpying file %s" ), NewCoverFile.c_str() );
                     if( !wxFileExists( NewCoverFile ) )
                     {
-                        if( !wxCopyFile( CoverPath, NewCoverFile ) )
+                        if( !wxCopyFile( CoverPath, NewCoverFile ) && !guCopyWithGio(CoverPath,NewCoverFile))
                         {
                             guLogMessage( wxT( "Could not copy the cover %s" ), NewCoverFile.c_str() );
                         }
