@@ -2,6 +2,6 @@
 rm CMakeCache.txt
 cmake . \
  -DCMAKE_BUILD_TYPE='Release' \
- -DCMAKE_INSTALL_PREFIX=/usr \
+ -DCMAKE_INSTALL_PREFIX=/home/gowen \
  -DCMAKE_CXX_STANDARD="11" \
  && make
