@@ -510,7 +510,7 @@ void guPrefDialog::BuildGeneralPage( void )
 
     m_IgnoreLayoutsChkBox = new wxCheckBox( m_GenPanel, wxID_ANY, _( "Load default layout" ), wxDefaultPosition, wxDefaultSize, 0 );
     m_IgnoreLayoutsChkBox->SetValue( m_Config->ReadBool( CONFIG_KEY_GENERAL_LOAD_DEFAULT_LAYOUTS, false, CONFIG_PATH_GENERAL ) );
-	StartSizer->Add( m_IgnoreLayoutsChkBox, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+	StartSizer->Add( m_IgnoreLayoutsChkBox, 0, wxRIGHT|wxLEFT, 5 );
 
 	GenMainSizer->Add( StartSizer, 0, wxEXPAND|wxALL, 5 );
 
@@ -706,7 +706,7 @@ void guPrefDialog::BuildLibraryPage( void )
 	m_LibOptDelCoverBtn->Enable( false );
 	LibOptCoverBtnSizer->Add( m_LibOptDelCoverBtn, 0, wxBOTTOM, 5 );
 
-	LibOptCoversSizer->Add( LibOptCoverBtnSizer, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	LibOptCoversSizer->Add( LibOptCoverBtnSizer, 0, wxEXPAND, 5 );
 
 	m_LibOptSizer->Add( LibOptCoversSizer, 1, wxEXPAND, 5 );
 
@@ -868,7 +868,7 @@ void guPrefDialog::BuildPlaybackPage( void )
 
 	m_PlayPreAmpLevelSlider = new wxSlider( m_PlayPanel, wxID_ANY, ReplayGainPreAmpVal, -20, 20, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	m_PlayPreAmpLevelSlider->Enable( ReplayGainModeVal );
-	PlayReplaySizer->Add( m_PlayPreAmpLevelSlider, 1, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxEXPAND, 5 );
+	PlayReplaySizer->Add( m_PlayPreAmpLevelSlider, 1, wxRIGHT|wxEXPAND, 5 );
 
 	PlayGenSizer->Add( PlayReplaySizer, 1, wxEXPAND, 5 );
 
@@ -941,17 +941,17 @@ void guPrefDialog::BuildPlaybackPage( void )
     bool IsPlayLevelEnabled = m_Config->ReadBool( CONFIG_KEY_PLAYBCK_SILENCE_DETECTOR, false, CONFIG_PATH_PLAYBACK );
 	m_PlayLevelEnabled = new wxCheckBox( m_PlayPanel, wxID_ANY, _("Skip at"), wxDefaultPosition, wxDefaultSize, 0 );
     m_PlayLevelEnabled->SetValue( IsPlayLevelEnabled );
-	PlayLevelSizer->Add( m_PlayLevelEnabled, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
+	PlayLevelSizer->Add( m_PlayLevelEnabled, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
 
     int PlayLevelValue = m_Config->ReadNum( CONFIG_KEY_PLAYBCK_SILENCE_LEVEL, -500, CONFIG_PATH_PLAYBACK );
 	m_PlayLevelVal = new wxStaticText( m_PlayPanel, wxID_ANY, wxString::Format( wxT("%02idb"), PlayLevelValue ), wxDefaultPosition, wxDefaultSize, 0 );
 	m_PlayLevelVal->Wrap( -1 );
 	m_PlayLevelVal->Enable( IsPlayLevelEnabled );
-	PlayLevelSizer->Add( m_PlayLevelVal, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxBOTTOM|wxRIGHT, 5 );
+	PlayLevelSizer->Add( m_PlayLevelVal, 0, wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT, 5 );
 
 	m_PlayLevelSlider = new wxSlider( m_PlayPanel, wxID_ANY, PlayLevelValue, -65, 0, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	m_PlayLevelSlider->Enable( IsPlayLevelEnabled );
-	PlayLevelSizer->Add( m_PlayLevelSlider, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT, 5 );
+	PlayLevelSizer->Add( m_PlayLevelSlider, 1, wxEXPAND|wxBOTTOM|wxRIGHT, 5 );
 
 	PlaySilenceSizer->Add( PlayLevelSizer, 0, wxEXPAND, 5 );
 
@@ -993,7 +993,7 @@ void guPrefDialog::BuildPlaybackPage( void )
 
     m_PlayOutDevName = new wxTextCtrl( m_PlayPanel, wxID_ANY, m_Config->ReadStr( CONFIG_KEY_PLAYBACK_OUTPUT_DEVICE_NAME, wxEmptyString, CONFIG_PATH_PLAYBACK ), wxDefaultPosition, wxDefaultSize, 0 );
 	m_PlayOutDevName->Enable( OutDevice > guOUTPUT_DEVICE_GCONF );
-	PlayOutDeviceSizer->Add( m_PlayOutDevName, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT, 5 );
+	PlayOutDeviceSizer->Add( m_PlayOutDevName, 1, wxEXPAND|wxBOTTOM|wxRIGHT, 5 );
 
 	PlayMainSizer->Add( PlayOutDeviceSizer, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
 
@@ -1047,7 +1047,7 @@ void guPrefDialog::BuildCrossfaderPage( void )
 
     m_XFadeOutLenSlider = new wxSlider( m_XFadePanel, wxID_ANY, m_Config->ReadNum( CONFIG_KEY_CROSSFADER_FADEOUT_TIME, 50, CONFIG_PATH_CROSSFADER ), 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
     m_XFadeOutLenSlider->SetToolTip( _( "Select the length of the fade out. 0 for gapless playback" ) );
-	XFadeFlexSizer->Add( m_XFadeOutLenSlider, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	XFadeFlexSizer->Add( m_XFadeOutLenSlider, 1, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * XFadeInLenLabel = new wxStaticText( m_XFadePanel, wxID_ANY, _("Fade-in length:"), wxDefaultPosition, wxDefaultSize, 0 );
 	XFadeInLenLabel->Wrap( -1 );
@@ -1059,7 +1059,7 @@ void guPrefDialog::BuildCrossfaderPage( void )
 
     m_XFadeInLenSlider = new wxSlider( m_XFadePanel, wxID_ANY, m_Config->ReadNum( CONFIG_KEY_CROSSFADER_FADEIN_TIME, 10, CONFIG_PATH_CROSSFADER ), 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
     m_XFadeInLenSlider->SetToolTip( _( "Select the length of the fade in" ) );
-	XFadeFlexSizer->Add( m_XFadeInLenSlider, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	XFadeFlexSizer->Add( m_XFadeInLenSlider, 0, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * XFadeInStartLabel = new wxStaticText( m_XFadePanel, wxID_ANY, _("Fade-in volume:"), wxDefaultPosition, wxDefaultSize, 0 );
 	XFadeInStartLabel->Wrap( -1 );
@@ -1071,7 +1071,7 @@ void guPrefDialog::BuildCrossfaderPage( void )
 
     m_XFadeInStartSlider = new wxSlider( m_XFadePanel, wxID_ANY, m_Config->ReadNum( CONFIG_KEY_CROSSFADER_FADEIN_VOL_START, 80, CONFIG_PATH_CROSSFADER ), 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
     m_XFadeInStartSlider->SetToolTip( _( "Select the initial volume of the fade in" ) );
-	XFadeFlexSizer->Add( m_XFadeInStartSlider, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	XFadeFlexSizer->Add( m_XFadeInStartSlider, 0, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * XFadeTrigerLabel = new wxStaticText( m_XFadePanel, wxID_ANY, _("Fade-in start:"), wxDefaultPosition, wxDefaultSize, 0 );
 	XFadeTrigerLabel->Wrap( -1 );
@@ -1083,7 +1083,7 @@ void guPrefDialog::BuildCrossfaderPage( void )
 
     m_XFadeInTrigerSlider = new wxSlider( m_XFadePanel, wxID_ANY, m_Config->ReadNum( CONFIG_KEY_CROSSFADER_FADEIN_VOL_TRIGER, 50, CONFIG_PATH_CROSSFADER ), 10, 90, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
     m_XFadeInTrigerSlider->SetToolTip( _( "Select at which volume of the fade out the fade in starts" ) );
-	XFadeFlexSizer->Add( m_XFadeInTrigerSlider, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	XFadeFlexSizer->Add( m_XFadeInTrigerSlider, 0, wxEXPAND|wxRIGHT, 5 );
 
 	XFadesbSizer->Add( XFadeFlexSizer, 1, wxEXPAND, 5 );
 
@@ -1351,7 +1351,7 @@ void guPrefDialog::BuildLyricsPage( void )
     }
 
 	m_LyricsSrcListBox = new wxCheckListBox( m_LyricsPanel, wxID_ANY, wxDefaultPosition, wxSize( -1, guPREFERENCES_LISTBOX_HEIGHT ), LyricSourcesNames, 0 );
-	LyricsSrcSizer->Add( m_LyricsSrcListBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	LyricsSrcSizer->Add( m_LyricsSrcListBox, 1, wxALL|wxEXPAND, 5 );
 	for( Index = 0; Index < Count; Index++ )
 	{
         m_LyricsSrcListBox->Check( Index, LyricSourcesEnabled[ Index ] );
@@ -1423,7 +1423,7 @@ void guPrefDialog::BuildLyricsPage( void )
 
 	wxStaticText * LyricsFontLabel = new wxStaticText( m_LyricsPanel, wxID_ANY, _( "Font:" ), wxDefaultPosition, wxDefaultSize, 0 );
 	LyricsFontLabel->Wrap( -1 );
-	LyricsFontSizer->Add( LyricsFontLabel, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxRIGHT|wxLEFT, 5 );
+	LyricsFontSizer->Add( LyricsFontLabel, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
 
 	wxFont LyricFont;
     LyricFont.SetNativeFontInfo( m_Config->ReadStr( CONFIG_KEY_LYRICS_FONT, wxEmptyString, CONFIG_PATH_LYRICS ) );
@@ -1431,11 +1431,11 @@ void guPrefDialog::BuildLyricsPage( void )
         LyricFont = GetFont();
 	m_LyricFontPicker = new wxFontPickerCtrl( m_LyricsPanel, wxID_ANY, LyricFont, wxDefaultPosition, wxDefaultSize, wxFNTP_DEFAULT_STYLE );
 	m_LyricFontPicker->SetMaxPointSize( 100 );
-	LyricsFontSizer->Add( m_LyricFontPicker, 2, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	LyricsFontSizer->Add( m_LyricFontPicker, 2, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * LyricsAlignLabel = new wxStaticText( m_LyricsPanel, wxID_ANY, _( "Align:" ), wxDefaultPosition, wxDefaultSize, 0 );
 	LyricsAlignLabel->Wrap( -1 );
-	LyricsFontSizer->Add( LyricsAlignLabel, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxRIGHT|wxLEFT, 5 );
+	LyricsFontSizer->Add( LyricsAlignLabel, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
 
 	wxArrayString LyricsAlignChoices;
 	LyricsAlignChoices.Add( _( "Left" ) );
@@ -1506,7 +1506,7 @@ void guPrefDialog::BuildOnlinePage( void )
 
     wxStaticText * ProxyPortStaticText = new wxStaticText( m_OnlinePanel, wxID_ANY, _( "Port:" ), wxDefaultPosition, wxDefaultSize, 0 );
     ProxyPortStaticText->Wrap( -1 );
-    ProxyHostPortSizer->Add( ProxyPortStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxTOP|wxBOTTOM|wxLEFT, 5 );
+    ProxyHostPortSizer->Add( ProxyPortStaticText, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     m_OnlineProxyPortTextCtrl = new wxTextCtrl( m_OnlinePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 50, -1 ), 0 );
     m_OnlineProxyPortTextCtrl->SetValue( m_Config->ReadStr( CONFIG_KEY_PROXY_PORT, wxEmptyString, CONFIG_PATH_PROXY ) );
@@ -1517,7 +1517,7 @@ void guPrefDialog::BuildOnlinePage( void )
 
     wxStaticText * ProxyUsernameStaticText = new wxStaticText( m_OnlinePanel, wxID_ANY, _("Username:"), wxDefaultPosition, wxDefaultSize, 0 );
     ProxyUsernameStaticText->Wrap( -1 );
-    OnlineProxySizer->Add( ProxyUsernameStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxTOP|wxBOTTOM|wxLEFT, 5 );
+    OnlineProxySizer->Add( ProxyUsernameStaticText, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     m_OnlineProxyUserTextCtrl = new wxTextCtrl( m_OnlinePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 200,-1 ), 0 );
     m_OnlineProxyUserTextCtrl->SetValue( m_Config->ReadStr( CONFIG_KEY_PROXY_USERNAME, wxEmptyString, CONFIG_PATH_PROXY ) );
@@ -1526,7 +1526,7 @@ void guPrefDialog::BuildOnlinePage( void )
 
     wxStaticText * PasswdStaticText = new wxStaticText( m_OnlinePanel, wxID_ANY, _("Password:"), wxDefaultPosition, wxDefaultSize, 0 );
     PasswdStaticText->Wrap( -1 );
-    OnlineProxySizer->Add( PasswdStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxTOP|wxBOTTOM|wxLEFT, 5 );
+    OnlineProxySizer->Add( PasswdStaticText, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     m_OnlineProxyPasswdTextCtrl = new wxTextCtrl( m_OnlinePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 200,-1 ), wxTE_PASSWORD );
     m_OnlineProxyPasswdTextCtrl->SetValue( m_Config->ReadStr( CONFIG_KEY_PROXY_PASSWORD, wxEmptyString, CONFIG_PATH_PROXY ) );
@@ -1560,7 +1560,7 @@ void guPrefDialog::BuildOnlinePage( void )
 
     m_LangStaticText = new wxStaticText( m_OnlinePanel, wxID_ANY, _("Language:"), wxDefaultPosition, wxDefaultSize, 0 );
     m_LangStaticText->Wrap( -1 );
-    OnlineLangSizer->Add( m_LangStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxTOP|wxBOTTOM|wxLEFT, 5 );
+    OnlineLangSizer->Add( m_LangStaticText, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     m_LangChoice = new wxChoice( m_OnlinePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_LFMLangNames, 0 );
 
@@ -1635,7 +1635,7 @@ void guPrefDialog::BuildPodcastsPage( void )
 
     m_PodcastPath = new wxDirPickerCtrl( m_PodcastPanel, wxID_ANY, wxEmptyString, _("Select podcasts folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE | wxDIRP_DIR_MUST_EXIST );
     m_PodcastPath->SetPath( m_Config->ReadStr( CONFIG_KEY_PODCASTS_PATH, guPATH_PODCASTS, CONFIG_PATH_PODCASTS ) );
-    PathSizer->Add( m_PodcastPath, 1, wxBOTTOM|wxRIGHT|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+    PathSizer->Add( m_PodcastPath, 1, wxBOTTOM|wxRIGHT|wxEXPAND, 5 );
 
     PodcastsSizer->Add( PathSizer, 0, wxEXPAND, 5 );
 
@@ -1766,7 +1766,7 @@ void guPrefDialog::BuildJamendoPage( void )
     JamFlexSizer->Add( JamBTCmdLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT|wxALIGN_RIGHT, 5 );
 
     m_JamBTCmd = new wxTextCtrl( m_JamendoPanel, wxID_ANY, m_Config->ReadStr( CONFIG_KEY_JAMENDO_TORRENT_COMMAND, wxT( "transmission" ), CONFIG_PATH_JAMENDO ), wxDefaultPosition, wxDefaultSize, 0 );
-    JamFlexSizer->Add( m_JamBTCmd, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    JamFlexSizer->Add( m_JamBTCmd, 1, wxEXPAND|wxALL, 5 );
 
     JamOtherSizer->Add( JamFlexSizer, 1, wxEXPAND, 5 );
 
@@ -1873,7 +1873,7 @@ void guPrefDialog::BuildMagnatunePage( void )
 
     m_MagUserTextCtrl = new wxTextCtrl( m_MagnatunePanel, wxID_ANY, m_Config->ReadStr( CONFIG_KEY_MAGNATUNE_USERNAME, wxEmptyString, CONFIG_PATH_MAGNATUNE ), wxDefaultPosition, wxDefaultSize, 0 );
     m_MagUserTextCtrl->Enable( !m_MagNoRadioItem->GetValue() );
-    MagFlexSizer->Add( m_MagUserTextCtrl, 0, wxTOP|wxBOTTOM|wxRIGHT|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+    MagFlexSizer->Add( m_MagUserTextCtrl, 0, wxTOP|wxBOTTOM|wxRIGHT|wxEXPAND, 5 );
 
     wxStaticText * MagPassLabel = new wxStaticText( m_MagnatunePanel, wxID_ANY, _( "Password :" ), wxDefaultPosition, wxDefaultSize, 0 );
     MagPassLabel->Wrap( -1 );
@@ -1881,7 +1881,7 @@ void guPrefDialog::BuildMagnatunePage( void )
 
     m_MagPassTextCtrl = new wxTextCtrl( m_MagnatunePanel, wxID_ANY, m_Config->ReadStr( CONFIG_KEY_MAGNATUNE_PASSWORD, wxEmptyString, CONFIG_PATH_MAGNATUNE ), wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD );
     m_MagPassTextCtrl->Enable( !m_MagNoRadioItem->GetValue() );
-    MagFlexSizer->Add( m_MagPassTextCtrl, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT, 5 );
+    MagFlexSizer->Add( m_MagPassTextCtrl, 0, wxEXPAND|wxBOTTOM|wxRIGHT, 5 );
 
 //    wxStaticText * MagFormatLabel = new wxStaticText( m_MagnatunePanel, wxID_ANY, _( "Format :" ), wxDefaultPosition, wxDefaultSize, 0 );
 //    MagFormatLabel->Wrap( -1 );
@@ -1905,7 +1905,7 @@ void guPrefDialog::BuildMagnatunePage( void )
     m_MagFormatChoice->SetSelection( m_Config->ReadNum( CONFIG_KEY_MAGNATUNE_AUDIO_FORMAT, 1, CONFIG_PATH_MAGNATUNE ) );
     m_MagFormatChoice->SetMinSize( wxSize( 100,-1 ) );
 
-    FormatSizer->Add( m_MagFormatChoice, 1, wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxRIGHT|wxEXPAND, 5 );
+    FormatSizer->Add( m_MagFormatChoice, 1, wxBOTTOM|wxRIGHT|wxEXPAND, 5 );
 
     wxStaticText * MagDownLabel = new wxStaticText( m_MagnatunePanel, wxID_ANY, _("Download as :"), wxDefaultPosition, wxDefaultSize, 0 );
     MagDownLabel->Wrap( -1 );
@@ -1918,7 +1918,7 @@ void guPrefDialog::BuildMagnatunePage( void )
     m_MagDownFormatChoice->Enable( Membership == 2 );
     m_MagDownFormatChoice->SetMinSize( wxSize( 100,-1 ) );
 
-    FormatSizer->Add( m_MagDownFormatChoice, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxBOTTOM|wxRIGHT, 5 );
+    FormatSizer->Add( m_MagDownFormatChoice, 1, wxEXPAND|wxBOTTOM|wxRIGHT, 5 );
 
     MagFlexSizer->Add( FormatSizer, 1, wxEXPAND, 5 );
 
@@ -2012,14 +2012,14 @@ void guPrefDialog::BuildLinksPage( void )
 	LinksFieldsSizer->Add( LinkUrlStaticText, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 
 	m_LinksUrlTextCtrl = new wxTextCtrl( m_LinksPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	LinksFieldsSizer->Add( m_LinksUrlTextCtrl, 1, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	LinksFieldsSizer->Add( m_LinksUrlTextCtrl, 1, wxALL|wxEXPAND, 5 );
 
 	wxStaticText * LinkNameStaticText = new wxStaticText( m_LinksPanel, wxID_ANY, _("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	LinkNameStaticText->Wrap( -1 );
 	LinksFieldsSizer->Add( LinkNameStaticText, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 
 	m_LinksNameTextCtrl = new wxTextCtrl( m_LinksPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	LinksFieldsSizer->Add( m_LinksNameTextCtrl, 1, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	LinksFieldsSizer->Add( m_LinksNameTextCtrl, 1, wxALL|wxEXPAND, 5 );
 
 	LinksEditorSizer->Add( LinksFieldsSizer, 1, wxEXPAND, 5 );
 
@@ -2133,14 +2133,14 @@ void guPrefDialog::BuildCommandsPage( void )
 	CmdFieldsSizer->Add( CmdStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_CmdTextCtrl = new wxTextCtrl( m_CmdPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	CmdFieldsSizer->Add( m_CmdTextCtrl, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	CmdFieldsSizer->Add( m_CmdTextCtrl, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
 
 	wxStaticText * CmdNameStaticText = new wxStaticText( m_CmdPanel, wxID_ANY, _( "Name:" ), wxDefaultPosition, wxDefaultSize, 0 );
 	CmdNameStaticText->Wrap( -1 );
 	CmdFieldsSizer->Add( CmdNameStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_CmdNameTextCtrl = new wxTextCtrl( m_CmdPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	CmdFieldsSizer->Add( m_CmdNameTextCtrl, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	CmdFieldsSizer->Add( m_CmdNameTextCtrl, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
 
 	CmdEditorSizer->Add( CmdFieldsSizer, 1, wxEXPAND, 5 );
 
@@ -2265,14 +2265,14 @@ void guPrefDialog::BuildCopyToPage( void )
 	CopyToFieldsSizer->Add( CopyToNameStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxLEFT|wxRIGHT, 5 );
 
 	m_CopyToNameTextCtrl = new wxTextCtrl( m_CopyPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	CopyToFieldsSizer->Add( m_CopyToNameTextCtrl, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	CopyToFieldsSizer->Add( m_CopyToNameTextCtrl, 1, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * CopyToPatternStaticText = new wxStaticText( m_CopyPanel, wxID_ANY, _( "Pattern:" ), wxDefaultPosition, wxDefaultSize, 0 );
 	CopyToPatternStaticText->Wrap( -1 );
 	CopyToFieldsSizer->Add( CopyToPatternStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxLEFT|wxRIGHT, 5 );
 
 	m_CopyToPatternTextCtrl = new wxTextCtrl( m_CopyPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	CopyToFieldsSizer->Add( m_CopyToPatternTextCtrl, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxRIGHT, 5 );
+	CopyToFieldsSizer->Add( m_CopyToPatternTextCtrl, 1, wxEXPAND|wxRIGHT, 5 );
 
 	wxStaticText * CopyToFormatLabel = new wxStaticText( m_CopyPanel, wxID_ANY, _( "Format:" ), wxDefaultPosition, wxDefaultSize, 0 );
 	CopyToFormatLabel->Wrap( -1 );
@@ -2283,12 +2283,12 @@ void guPrefDialog::BuildCopyToPage( void )
 
 	m_CopyToFormatChoice = new wxChoice( m_CopyPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, guTranscodeFormatStrings(), 0 );
 	m_CopyToFormatChoice->SetSelection( 0 );
-	CopyToFormatSizer->Add( m_CopyToFormatChoice, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+	CopyToFormatSizer->Add( m_CopyToFormatChoice, 1, wxEXPAND|wxRIGHT, 5 );
 
 	m_CopyToQualityChoice = new wxChoice( m_CopyPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, guTranscodeQualityStrings(), 0 );
 	m_CopyToQualityChoice->SetSelection( guTRANSCODE_QUALITY_KEEP );
 	m_CopyToQualityChoice->Enable( false );
-	CopyToFormatSizer->Add( m_CopyToQualityChoice, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+	CopyToFormatSizer->Add( m_CopyToQualityChoice, 1, wxEXPAND|wxRIGHT, 5 );
 
 	CopyToFieldsSizer->Add( CopyToFormatSizer, 1, wxEXPAND, 5 );
 
@@ -2299,7 +2299,7 @@ void guPrefDialog::BuildCopyToPage( void )
     wxBoxSizer * CopyToPathSizer = new wxBoxSizer( wxHORIZONTAL );
 
 	m_CopyToPathTextCtrl = new wxTextCtrl( m_CopyPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	CopyToPathSizer->Add( m_CopyToPathTextCtrl, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	CopyToPathSizer->Add( m_CopyToPathTextCtrl, 1, wxEXPAND, 5 );
 
     m_CopyToPathBtn = new wxButton( m_CopyPanel, wxID_ANY, wxT( "..." ), wxDefaultPosition, wxSize( 28,-1 ), 0 );
     CopyToPathSizer->Add( m_CopyToPathBtn, 0, wxRIGHT, 5 );
