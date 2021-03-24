@@ -397,7 +397,7 @@ int guSoListBox::GetSelectedSongs( guTrackArray * tracks, const bool isdrag ) co
 
     m_MediaViewer->NormalizeTracks( tracks, isdrag );
 
-    guLogMessage( wxT( "SOListBox::GetSelectedTracks <- %li" ), tracks->Count() );
+    // guLogMessage( wxT( "SOListBox::GetSelectedTracks <- %li" ), tracks->Count() );
     return tracks->Count();
 }
 

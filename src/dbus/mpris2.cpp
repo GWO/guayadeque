@@ -365,7 +365,7 @@ static void FillMetadataDetails( DBusMessageIter * Iter, const char * name, cons
     DBusMessageIter dict_entry, vstruct, ostruct, plstruct;
     if( name )
     {
-        guLogMessage( wxT( "playlist active %i" ), plstate );
+      // guLogMessage( wxT( "playlist active %i" ), plstate );
 
         dbus_message_iter_open_container( Iter, DBUS_TYPE_DICT_ENTRY, NULL, &dict_entry );
 
