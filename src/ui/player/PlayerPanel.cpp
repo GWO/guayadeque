@@ -42,10 +42,6 @@
 
 namespace Guayadeque {
 
-//#define guLogDebug(...)  guLogMessage(__VA_ARGS__)
-#define guLogDebug(...)
-
-
 #define GUPLAYER_MIN_PREVTRACK_POS      5000
 
 #define guPLAYER_SMART_CACHEITEMS       100
@@ -109,6 +105,8 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
     m_ShowNotificationsTime = 0;
     m_ErrorFound = false;
     m_SavedPlayedTrack = false;
+    m_EnableEq = true;
+    m_EnableVolCtls = true;
 
     m_SilenceDetected = false;
     m_AboutToEndDetected = false;
@@ -128,6 +126,8 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
     m_PlayRandomMode = Config->ReadNum( CONFIG_KEY_GENERAL_RANDOM_MODE_ON_EMPTY_PLAYLIST, guRANDOM_MODE_TRACK, CONFIG_PATH_GENERAL );
     m_ShowNotifications = Config->ReadBool( CONFIG_KEY_GENERAL_SHOW_NOTIFICATIONS, true, CONFIG_PATH_GENERAL );
     m_ShowNotificationsTime = Config->ReadNum( CONFIG_KEY_GENERAL_NOTIFICATION_TIME, 0, CONFIG_PATH_GENERAL );
+    m_EnableEq = Config->ReadBool( CONFIG_KEY_GENERAL_EQ_ENABLED, true, CONFIG_PATH_GENERAL );
+    m_EnableVolCtls = Config->ReadBool( CONFIG_KEY_GENERAL_VOLUME_ENABLED, true, CONFIG_PATH_GENERAL );
 
     m_SmartPlayAddTracks = Config->ReadNum( CONFIG_KEY_PLAYBACK_NUM_TRACKS_TO_ADD, 3, CONFIG_PATH_PLAYBACK );
     m_SmartPlayMinTracksToPlay = Config->ReadNum( CONFIG_KEY_PLAYBACK_MIN_TRACKS_PLAY, 4, CONFIG_PATH_PLAYBACK );
@@ -153,7 +153,7 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
 
     m_ShowRevTime = Config->ReadBool( CONFIG_KEY_GENERAL_SHOW_REV_TIME, false, CONFIG_PATH_GENERAL );
 
-    m_ForceGapless = Config->ReadBool( CONFIG_KEY_CROSSFADER_FORCE_GAPLESS, false, CONFIG_PATH_CROSSFADER );
+    m_ForceGapless = m_EnableVolCtls ? Config->ReadBool( CONFIG_KEY_CROSSFADER_FORCE_GAPLESS, false, CONFIG_PATH_CROSSFADER ) : true;
     m_FadeOutTime = Config->ReadNum( CONFIG_KEY_CROSSFADER_FADEOUT_TIME, 50, CONFIG_PATH_CROSSFADER ) * 100;
 
     m_SliderIsDragged = false;
@@ -213,26 +213,32 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
     m_ForceGaplessButton->SetToolTip( m_ForceGapless ? _( "Enable crossfading" ) : _( "Disable crossfading" ) );
     PlayerBtnSizer->Add( m_ForceGaplessButton, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT|wxRIGHT, guPLAYER_ICONS_SEPARATOR );
 
+    if( !m_EnableVolCtls )
+        m_ForceGaplessButton->Hide();
+
     PlayerBtnSizer->Add( guPLAYER_ICONS_GROUPSEPARATOR, 0, 0, wxEXPAND, 5 );
 
     //m_EqualizerButton = new wxBitmapButton( this, wxID_ANY, guImage( guIMAGE_INDEX_player_normal_equalizer ), wxDefaultPosition, wxDefaultSize, 0 );
-    m_EqualizerButton = new guRoundButton( this, guImage( guIMAGE_INDEX_player_normal_equalizer ), guImage( guIMAGE_INDEX_player_highlight_equalizer ) );
-    m_EqualizerButton->SetToolTip( _( "Show the equalizer" ) );
-    PlayerBtnSizer->Add( m_EqualizerButton, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, guPLAYER_ICONS_SEPARATOR );
+    m_EqualizerButton = new guRoundButton( this, guImage( m_EnableEq ? guIMAGE_INDEX_player_normal_equalizer : guIMAGE_INDEX_player_light_equalizer ), guImage( guIMAGE_INDEX_player_highlight_equalizer ) );
+    m_EqualizerButton->SetToolTip( _( "Show the equalizer (right click for on/off)" ) );
+    PlayerBtnSizer->Add( m_EqualizerButton, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, guPLAYER_ICONS_SEPARATOR );        
 
-    //m_VolumeButton = new wxBitmapButton( this, wxID_ANY, guImage( guIMAGE_INDEX_player_normal_vol_mid ), wxDefaultPosition, wxDefaultSize, 0 );
     m_VolumeButton = new guRoundButton( this, guImage( guIMAGE_INDEX_player_normal_vol_mid ), guImage( guIMAGE_INDEX_player_highlight_vol_mid ) );
     m_VolumeButton->SetToolTip( _( "Volume" ) + wxString::Format( wxT( " %i%%" ), ( int ) SavedVol ) );
     PlayerBtnSizer->Add( m_VolumeButton, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, guPLAYER_ICONS_SEPARATOR );
+    if( !m_EnableVolCtls )
+        m_VolumeButton->Hide();
+
 
     m_VolumeBar = new wxSlider( this, wxID_ANY, SavedVol, 0, 100 );
     m_VolumeBar->SetMinSize( wxSize( 100, 40 ) );
     PlayerBtnSizer->Add( m_VolumeBar, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, guPLAYER_ICONS_SEPARATOR );
-    if( Config->ReadBool( CONFIG_KEY_GENERAL_PLAYER_VOLUME_VISIBLE, true, CONFIG_PATH_GENERAL ) )
+    if( m_EnableVolCtls && Config->ReadBool( CONFIG_KEY_GENERAL_PLAYER_VOLUME_VISIBLE, true, CONFIG_PATH_GENERAL ) )
         m_VolumeBar->Show();
     else
         m_VolumeBar->Hide();
-    PlayerMainSizer->Add( PlayerBtnSizer, 0, wxEXPAND, 2 );
+    PlayerMainSizer->Add( PlayerBtnSizer, 0, wxEXPAND, 2 );        
+    //m_VolumeButton = new wxBitmapButton( this, wxID_ANY, guImage( guIMAGE_INDEX_player_normal_vol_mid ), wxDefaultPosition, wxDefaultSize, 0 );
 
 
     wxBoxSizer * PlayerDetailsSizer;
@@ -382,16 +388,28 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
     m_PlayButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnPlayButtonClick, this );
     m_StopButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnStopButtonClick, this );
     m_RecordButton->Bind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnRecordButtonClick, this );
-    m_ForceGaplessButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnForceGaplessClick, this );
-    m_VolumeButton->Bind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );
-    m_VolumeButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnVolumeClicked, this );
-    m_VolumeBar->Bind( wxEVT_SCROLL_CHANGED	, &guPlayerPanel::OnVolumeChanged, this );
-    m_VolumeBar->Bind( wxEVT_SCROLL_THUMBTRACK, &guPlayerPanel::OnVolumeChanged, this );
-    m_VolumeBar->Bind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );
+    if( m_ForceGaplessButton != NULL )
+        m_ForceGaplessButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnForceGaplessClick, this );
+    if( m_VolumeButton != NULL )
+    {
+        m_VolumeButton->Bind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );
+        m_VolumeButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnVolumeClicked, this );
+        m_VolumeButton->Bind( wxEVT_COMMAND_RIGHT_CLICK, &guPlayerPanel::OnVolumeRightClicked, this );
+    }
+    if( m_VolumeBar != NULL )
+    {
+        m_VolumeBar->Bind( wxEVT_SCROLL_CHANGED	, &guPlayerPanel::OnVolumeChanged, this );
+        m_VolumeBar->Bind( wxEVT_SCROLL_THUMBTRACK, &guPlayerPanel::OnVolumeChanged, this );
+        m_VolumeBar->Bind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );        
+    }
     //m_SmartPlayButton->Bind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnSmartPlayButtonClick, this );
     m_RandomPlayButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnRandomPlayButtonClick, this );
     //m_RepeatPlayButton->Bind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnRepeatPlayButtonClick, this );
-    m_EqualizerButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnEqualizerButtonClicked, this );
+    if( m_EqualizerButton != NULL )
+    {
+        m_EqualizerButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnEqualizerButtonClicked, this );
+        m_EqualizerButton->Bind( wxEVT_COMMAND_RIGHT_CLICK, &guPlayerPanel::OnEqualizerRightButtonClicked, this );
+    }
     m_PlayModeButton->Bind( wxEVT_BUTTON, &guPlayerPanel::OnPlayModeButtonClicked, this );
 
     Bind( wxEVT_MENU, &guPlayerPanel::OnRandomPlayButtonClick, this, ID_PLAYER_PLAYLIST_RANDOMPLAY );
@@ -427,6 +445,7 @@ guPlayerPanel::guPlayerPanel( wxWindow * parent, guDbLibrary * db,
     Bind( guEVT_MEDIA_CHANGED_STATE, &guPlayerPanel::OnMediaState, this );
     Bind( guEVT_MEDIA_CHANGED_POSITION, &guPlayerPanel::OnMediaPosition, this );
     Bind( guEVT_MEDIA_CHANGED_LENGTH, &guPlayerPanel::OnMediaLength, this );
+    Bind( guEVT_PIPELINE_CHANGED, &guPlayerPanel::OnUpdatePipeline, this );
 
     Bind( wxEVT_MENU, &guPlayerPanel::OnSmartAddTracks, this, ID_SMARTMODE_ADD_TRACKS );
     Bind( wxEVT_MENU, &guPlayerPanel::OnSmartEndThread, this, ID_SMARTMODE_THREAD_END );
@@ -478,8 +497,9 @@ guPlayerPanel::~guPlayerPanel()
 
         //printf( "guPlayerPanel::guConfig Save\n" );
         //Config->WriteBool( wxT( "PlayerStopped" ), m_MediaCtrl->GetState() != guMEDIASTATE_PLAYING, CONFIG_PATH_GENERAL );
-        Config->WriteNum( CONFIG_KEY_GENERAL_PLAYER_VOLUME, m_CurVolume, CONFIG_PATH_GENERAL );
-        Config->WriteBool( CONFIG_KEY_GENERAL_PLAYER_VOLUME_VISIBLE, m_VolumeBar->IsShown(), CONFIG_PATH_GENERAL );
+        Config->WriteNum( CONFIG_KEY_GENERAL_PLAYER_VOLUME, m_LastVolume == wxNOT_FOUND ? m_CurVolume : m_LastVolume, CONFIG_PATH_GENERAL );
+        if( m_VolumeBar != NULL )
+            Config->WriteBool( CONFIG_KEY_GENERAL_PLAYER_VOLUME_VISIBLE, m_VolumeBar->IsShown(), CONFIG_PATH_GENERAL );
         //Config->WriteNum( CONFIG_KEY_GENERAL_PLAYER_LOOP, m_PlayLoop, CONFIG_PATH_GENERAL );
         //Config->WriteBool( CONFIG_KEY_GENERAL_PLAYER_SMART, m_PlaySmart, CONFIG_PATH_GENERAL );
         Config->WriteNum( CONFIG_KEY_GENERAL_PLAYER_PLAYMODE, m_PlayMode, CONFIG_PATH_GENERAL );
@@ -516,12 +536,18 @@ guPlayerPanel::~guPlayerPanel()
     m_PlayButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnPlayButtonClick, this );
     m_StopButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnStopButtonClick, this );
     m_RecordButton->Unbind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnRecordButtonClick, this );
-    m_ForceGaplessButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnForceGaplessClick, this );
-    m_VolumeButton->Unbind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );
+    if( m_ForceGaplessButton != NULL )
+        m_ForceGaplessButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnForceGaplessClick, this );
+    if( m_VolumeButton != NULL )
+        m_VolumeButton->Unbind( wxEVT_MOUSEWHEEL, &guPlayerPanel::OnVolumeMouseWheel, this );
     //m_SmartPlayButton->Unbind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnSmartPlayButtonClick, this );
     m_RandomPlayButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnRandomPlayButtonClick, this );
     //m_RepeatPlayButton->Unbind( wxEVT_TOGGLEBUTTON, &guPlayerPanel::OnRepeatPlayButtonClick, this );
-    m_EqualizerButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnEqualizerButtonClicked, this );
+    if( m_EqualizerButton != NULL )
+    {
+        m_EqualizerButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnEqualizerButtonClicked, this );
+        m_EqualizerButton->Unbind( wxEVT_COMMAND_RIGHT_CLICK, &guPlayerPanel::OnEqualizerRightButtonClicked, this );
+    }
     m_PlayModeButton->Unbind( wxEVT_BUTTON, &guPlayerPanel::OnPlayModeButtonClicked, this );
 
     Unbind( wxEVT_MENU, &guPlayerPanel::OnRandomPlayButtonClick, this, ID_PLAYER_PLAYLIST_RANDOMPLAY );
@@ -557,6 +583,7 @@ guPlayerPanel::~guPlayerPanel()
     Unbind( guEVT_MEDIA_CHANGED_STATE, &guPlayerPanel::OnMediaState, this );
     Unbind( guEVT_MEDIA_CHANGED_POSITION, &guPlayerPanel::OnMediaPosition, this );
     Unbind( guEVT_MEDIA_CHANGED_LENGTH, &guPlayerPanel::OnMediaLength, this );
+    Unbind( guEVT_PIPELINE_CHANGED, &guPlayerPanel::OnUpdatePipeline, this );
 
     Unbind( wxEVT_MENU, &guPlayerPanel::OnSmartAddTracks, this, ID_SMARTMODE_ADD_TRACKS );
     Unbind( wxEVT_MENU, &guPlayerPanel::OnSmartEndThread, this, ID_SMARTMODE_THREAD_END );
@@ -592,6 +619,10 @@ void guPlayerPanel::OnConfigUpdated( wxCommandEvent &event )
         m_PlayRandomMode = Config->ReadNum( CONFIG_KEY_GENERAL_RANDOM_MODE_ON_EMPTY_PLAYLIST, guRANDOM_MODE_TRACK, CONFIG_PATH_GENERAL );
         m_ShowNotifications = Config->ReadBool( CONFIG_KEY_GENERAL_SHOW_NOTIFICATIONS, true, CONFIG_PATH_GENERAL );
         m_ShowNotificationsTime = Config->ReadNum( CONFIG_KEY_GENERAL_NOTIFICATION_TIME, 0, CONFIG_PATH_GENERAL );
+        if( m_EnableEq != Config->ReadBool( CONFIG_KEY_GENERAL_EQ_ENABLED, true, CONFIG_PATH_GENERAL ) )
+            OnEqualizerRightButtonClicked( event );
+        if( m_EnableVolCtls != Config->ReadBool( CONFIG_KEY_GENERAL_VOLUME_ENABLED, true, CONFIG_PATH_GENERAL ) )
+            OnVolCtlToggle( event );
 
         m_SmartPlayAddTracks = Config->ReadNum( CONFIG_KEY_PLAYBACK_NUM_TRACKS_TO_ADD, 3, CONFIG_PATH_PLAYBACK );
         m_SmartPlayMinTracksToPlay = Config->ReadNum( CONFIG_KEY_PLAYBACK_MIN_TRACKS_PLAY, 4, CONFIG_PATH_PLAYBACK );
@@ -1298,33 +1329,9 @@ void guPlayerPanel::OnPlayListDClick( wxCommandEvent &event )
 }
 
 // -------------------------------------------------------------------------------- //
-wxString inline FileNameEncode( const wxString filename )
-{
-    static const wxChar NumChars[] = wxT( "0123456789" );
-    wxString RetVal = filename;
-
-    if( filename.StartsWith( wxT( "file://" ) ) )
-    {
-        RetVal.Replace( wxT( "%" ), wxT( "%25" ) );
-    }
-    else
-    {
-        int Pos;
-        while( ( Pos = RetVal.Find( wxT( "%" ) ) ) != wxNOT_FOUND &&
-                !( wxStrchr( NumChars, RetVal[ Pos + 1 ] ) &&
-                   wxStrchr( NumChars, RetVal[ Pos + 2 ] ) ) )
-        {
-            RetVal = RetVal.Mid( 0, Pos ) + wxT( "%25" ) + RetVal.Mid( Pos + 1 );
-        }
-    }
-    RetVal.Replace( wxT( "#" ), wxT( "%23" ) );
-    return RetVal;
-}
-
-// -------------------------------------------------------------------------------- //
 void guPlayerPanel::LoadMedia( guFADERPLAYBIN_PLAYTYPE playtype, const bool forceskip )
 {
-    guLogDebug( wxT( "LoadMedia  %i  %i  (%i)" ), m_CurTrackId, m_NextTrackId, m_SavedPlayedTrack );
+    guLogDebug( wxT( "LoadMedia  %li  %li  (%i)" ), m_CurTrackId, m_NextTrackId, m_SavedPlayedTrack );
     if( !forceskip && ( m_MediaSong.m_Type & guTRACK_TYPE_STOP_HERE ) )
     {
         m_MediaSong.m_Type = guTrackType( int( m_MediaSong.m_Type ) ^ guTRACK_TYPE_STOP_HERE );
@@ -1334,13 +1341,17 @@ void guPlayerPanel::LoadMedia( guFADERPLAYBIN_PLAYTYPE playtype, const bool forc
 
     guLogDebug( wxT( "LoadMedia Cur: %i  %i starting at %i" ), m_PlayListCtrl->GetCurItem(), playtype, m_NextSong.m_Offset );
     //m_MediaCtrl->Load( NextItem->FileName );
-    wxURI UriPath( m_NextSong.m_FileName );
-    wxString Uri;
+
+    const char *fn_uri, *param = (const char*)m_NextSong.m_FileName.mb_str();
+
+    if( gst_uri_is_valid( param ) )
+        fn_uri = param;
+    else
+        fn_uri = gst_filename_to_uri( param, NULL );
+
+    wxString Uri = wxString( fn_uri );
+
     try {
-        if( !UriPath.HasScheme() )
-            Uri = wxT( "file://" ) + m_NextSong.m_FileName;
-        else
-            Uri = m_NextSong.m_FileName;
 
         if( ( playtype == guFADERPLAYBIN_PLAYTYPE_AFTER_EOS ) && ( m_MediaSong.m_Offset || m_NextSong.m_Offset ) )
         {
@@ -1348,7 +1359,7 @@ void guPlayerPanel::LoadMedia( guFADERPLAYBIN_PLAYTYPE playtype, const bool forc
         }
 
         //guLogDebug( wxT( "'%s'\n'%s'" ), FileName.c_str(), FileNameEncode( Uri ).c_str() );
-        m_NextTrackId = m_MediaCtrl->Load( FileNameEncode( Uri ), playtype, m_NextSong.m_Offset + m_TrackStartPos );
+        m_NextTrackId = m_MediaCtrl->Load( Uri, playtype, m_NextSong.m_Offset + m_TrackStartPos );
         if( m_TrackStartPos )
         {
             m_TrackStartPos = 0;
@@ -1550,7 +1561,7 @@ void guPlayerPanel::OnMediaState( guMediaEvent &event )
 // -------------------------------------------------------------------------------- //
 void  guPlayerPanel::OnMediaPosition( guMediaEvent &event )
 {
-    //guLogDebug( wxT( "OnMediaPosition... %i / %i - %li" ), event.GetInt(), m_MediaSong.m_Offset, event.GetExtraLong() );
+    guLogDebug( wxT( "OnMediaPosition... %i / %i - %li" ), event.GetInt(), m_MediaSong.m_Offset, event.GetExtraLong() );
 
     if( ( event.GetInt() < 0 ) || ( event.GetInt() < ( int ) m_MediaSong.m_Offset ) )
         return;
@@ -1607,7 +1618,7 @@ void  guPlayerPanel::OnMediaPosition( guMediaEvent &event )
 
     if( ( ( CurPos / 1000 ) != ( m_LastCurPos / 1000 ) ) && !m_SliderIsDragged )
     {
-        guLogDebug( wxT( "OnMediaPosition... %i - %li => %li  %li %li" ), CurPos, CurLen, m_LastLength - CurPos, m_CurTrackId, m_NextTrackId );
+        guLogDebug( wxT( "OnMediaPosition... %li - %li => %li  %li %li" ), CurPos, CurLen, m_LastLength - CurPos, m_CurTrackId, m_NextTrackId );
         m_LastCurPos = CurPos;
 
         if( m_TrackChanged )
@@ -1902,25 +1913,13 @@ void guPlayerPanel::OnMediaLoaded( guMediaEvent &event )
 // -------------------------------------------------------------------------------- //
 void guPlayerPanel::OnMediaPlayStarted( void )
 {
-    guLogDebug( wxT( "OnMediaPlayStarted  %i %i" ), m_CurTrackId, m_NextTrackId );
+    guLogDebug( wxT( "OnMediaPlayStarted  %li %li" ), m_CurTrackId, m_NextTrackId );
 
     SavePlayedTrack();
 
     // Enable or disables the record button. Only enabled for radio stations
     m_RecordButton->Enable( ( m_NextSong.m_Type == guTRACK_TYPE_RADIOSTATION ) );
-    if( m_RecordButton->GetValue() )
-    {
-        m_RecordButton->SetValue( ( m_NextSong.m_Type == guTRACK_TYPE_RADIOSTATION ) );
-        if( !m_RecordButton->GetValue() )
-        {
-            m_MediaRecordCtrl->Stop();
-        }
-        else
-        {
-            m_MediaRecordCtrl->Start( &m_NextSong );
-            //m_MediaRecordCtrl->SetTrack( m_NextSong );
-        }
-    }
+    m_RecordButton->SetValue( false );
 
     // Set the Current Song
     m_CurTrackId = m_NextTrackId;
@@ -2757,6 +2756,82 @@ void guPlayerPanel::OnEqualizerButtonClicked( wxCommandEvent &event )
 }
 
 // -------------------------------------------------------------------------------- //
+void guPlayerPanel::OnEqualizerRightButtonClicked( wxCommandEvent &event )
+{
+    guLogDebug( "guPlayerPanel::OnEqualizerRightButtonClicked << <%s>", event.GetString() );
+    m_MediaCtrl->ToggleEqualizer(); // this should return in OnUpdatePipeline
+}
+
+// -------------------------------------------------------------------------------- //
+void guPlayerPanel::OnUpdatePipeline( wxCommandEvent &event )
+{
+    guLogDebug( "guPlayerPanel::OnUpdatePipeline <<" );
+    auto wpp = (guFaderPlaybin::WeakPtr *)event.GetClientData();
+    if( wpp != NULL )
+    {
+        if( auto sp = wpp->lock() )
+        {
+            (*sp)->RefreshPlaybackItems();
+        }
+        else
+            guLogTrace( "Player update: target fader playbin is gone" );
+
+        delete wpp;
+    }
+    else
+    {
+        guLogTrace( "Player update: target fader playbin is null" );
+    }
+
+    guConfig * Config = ( guConfig * ) guConfig::Get();
+
+    if( GetState()  == guMEDIASTATE_PLAYING )
+    {
+        m_EnableEq = m_MediaCtrl->IsEqualizerEnabled();
+        m_EnableVolCtls = m_MediaCtrl->IsVolCtlsEnabled();
+        Config->WriteBool( CONFIG_KEY_GENERAL_EQ_ENABLED, m_EnableEq, CONFIG_PATH_GENERAL );
+        Config->WriteBool( CONFIG_KEY_GENERAL_VOLUME_ENABLED, m_EnableVolCtls, CONFIG_PATH_GENERAL );
+    }
+    else
+    {
+        m_EnableVolCtls = Config->ReadBool( CONFIG_KEY_GENERAL_VOLUME_ENABLED, true, CONFIG_PATH_GENERAL );
+        m_EnableEq = Config->ReadBool( CONFIG_KEY_GENERAL_EQ_ENABLED, true, CONFIG_PATH_GENERAL );
+    }
+    m_EqualizerButton->SetBitmapLabel( guImage( m_EnableEq ? guIMAGE_INDEX_player_normal_equalizer : guIMAGE_INDEX_player_light_equalizer ) );
+
+    bool fg = m_EnableVolCtls ? Config->ReadBool( CONFIG_KEY_CROSSFADER_FORCE_GAPLESS, false, CONFIG_PATH_CROSSFADER ) : true;
+    if( fg != m_ForceGapless )
+    {
+        event.SetInt( fg );
+        m_MainFrame->OnSetForceGapless( event );
+    }
+    
+    if( m_EnableVolCtls )
+    {
+        m_VolumeBar->Show();
+        m_VolumeButton->Show();
+        m_ForceGaplessButton->Show();
+    }
+    else
+    {
+        m_VolumeBar->Hide();
+        m_VolumeButton->Hide();
+        m_ForceGaplessButton->Hide();
+    }
+    m_RecordButton->SetValue( m_MediaCtrl->IsRecording() );
+    Layout();
+    guLogDebug( " guPlayerPanel::OnUpdatePipeline (eq=%i vol=%i fg=%i) >> ", m_EnableEq, m_EnableVolCtls, fg );
+
+}
+
+// -------------------------------------------------------------------------------- //
+void guPlayerPanel::OnVolCtlToggle( wxCommandEvent &event )
+{
+    guLogDebug( "guPlayerPanel::OnVolCtlToggle << <%s>", event.GetString() );
+    m_MediaCtrl->ToggleVolCtl();
+}
+
+// -------------------------------------------------------------------------------- //
 void guPlayerPanel::OnLeftClickPlayerCoverBitmap( wxMouseEvent &event )
 {
     if( m_MediaSong.m_CoverType == GU_SONGCOVER_NONE ||
@@ -2850,32 +2925,35 @@ void guPlayerPanel::SetVolume( double volume )
 
     m_CurVolume = volume;
 
-    if( m_CurVolume > 75 )
+    if( m_VolumeButton != NULL )
     {
-        m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_hi ) );
-        m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_hi ) );
+        if( m_CurVolume > 75 )
+        {
+            m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_hi ) );
+            m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_hi ) );
+        }
+        else if( m_CurVolume > 50 )
+        {
+            m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_mid ) );
+            m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_mid ) );
+        }
+        else if( m_CurVolume == 0 )
+        {
+            m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_muted ) );
+            m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_muted ) );
+        }
+        else
+        {
+            m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_low ) );
+            m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_low ) );
+        }
+        m_VolumeButton->Refresh();
+        m_VolumeButton->SetToolTip( _( "Volume" ) + wxString::Format( wxT( " %u%%" ), ( int ) volume ) );
     }
-    else if( m_CurVolume > 50 )
-    {
-        m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_mid ) );
-        m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_mid ) );
-    }
-    else if( m_CurVolume == 0 )
-    {
-        m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_muted ) );
-        m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_muted ) );
-    }
-    else
-    {
-        m_VolumeButton->SetBitmapLabel( guImage( guIMAGE_INDEX_player_normal_vol_low ) );
-        m_VolumeButton->SetBitmapHover( guImage( guIMAGE_INDEX_player_highlight_vol_low ) );
-    }
-    m_VolumeButton->Refresh();
-    m_LastVolume = m_CurVolume;
 
     m_MediaCtrl->SetVolume(  volume / ( double ) 100.0 );
-    m_VolumeButton->SetToolTip( _( "Volume" ) + wxString::Format( wxT( " %u%%" ), ( int ) volume ) );
-    m_VolumeBar->SetValue( m_CurVolume );
+    if( m_VolumeBar != NULL )
+        m_VolumeBar->SetValue( m_CurVolume );
 
     wxCommandEvent evt( wxEVT_MENU, ID_PLAYERPANEL_VOLUMECHANGED );
     wxPostEvent( m_MainFrame, evt );
@@ -3069,7 +3147,7 @@ void guPlayerPanel::SendNotifyInfo( wxImage * image )
 {
     if( m_ShowNotifications && m_NotifySrv )
     {
-        image->Rescale( 60, 60, wxIMAGE_QUALITY_HIGH );
+        image->Rescale( 300, 300, wxIMAGE_QUALITY_HIGH );
 
         wxString Body;
         if( m_MediaSong.m_Length )
@@ -3124,10 +3202,29 @@ void guPlayerPanel::OnVolumeChanged( wxScrollEvent &event )
 // -------------------------------------------------------------------------------- //
 void guPlayerPanel::OnVolumeClicked( wxCommandEvent &event )
 {
-    if( m_VolumeBar->IsShown() )
-        m_VolumeBar->Hide();
+    if( m_VolumeBar != NULL )
+    {
+        if( m_VolumeBar->IsShown() )
+            m_VolumeBar->Hide();
+        else
+            m_VolumeBar->Show();
+    }
+    Layout();
+}
+
+// -------------------------------------------------------------------------------- //
+void guPlayerPanel::OnVolumeRightClicked( wxCommandEvent &event )
+{
+    if( m_LastVolume == wxNOT_FOUND )
+    {
+        m_LastVolume = m_CurVolume;
+        SetVolume(0);
+    }
     else
-        m_VolumeBar->Show();
+    {
+        SetVolume(m_LastVolume);
+        m_LastVolume = wxNOT_FOUND;
+    }
     Layout();
 }
 
@@ -3181,9 +3278,12 @@ void guPlayerPanel::OnForceGaplessClick( wxCommandEvent &event )
     m_ForceGapless = !m_ForceGapless;
     m_MediaCtrl->ForceGapless( m_ForceGapless );
 
-    m_ForceGaplessButton->SetBitmapLabel( guImage( m_ForceGapless ? guIMAGE_INDEX_player_normal_gapless : guIMAGE_INDEX_player_normal_crossfading ) );
-    m_ForceGaplessButton->SetBitmapHover( guImage( m_ForceGapless ? guIMAGE_INDEX_player_highlight_gapless : guIMAGE_INDEX_player_highlight_crossfading ) );
-    m_ForceGaplessButton->SetToolTip( m_ForceGapless ? _( "Enable crossfading" ) : _( "Disable crossfading" ) );
+    if( m_ForceGaplessButton != NULL )
+    {
+        m_ForceGaplessButton->SetBitmapLabel( guImage( m_ForceGapless ? guIMAGE_INDEX_player_normal_gapless : guIMAGE_INDEX_player_normal_crossfading ) );
+        m_ForceGaplessButton->SetBitmapHover( guImage( m_ForceGapless ? guIMAGE_INDEX_player_highlight_gapless : guIMAGE_INDEX_player_highlight_crossfading ) );
+        m_ForceGaplessButton->SetToolTip( m_ForceGapless ? _( "Enable crossfading" ) : _( "Disable crossfading" ) );
+    }
 }
 
 // -------------------------------------------------------------------------------- //

@@ -72,7 +72,10 @@ class guMediaCtrl : public wxEvtHandler
 
     int                     m_BufferSize;
 
-    bool                    m_ReplayGainMode;
+    bool                    m_EnableEq;
+    bool                    m_EnableVolCtls;
+
+    long                    m_ReplayGainMode;
     double                  m_ReplayGainPreAmp;
     //double                  m_ReplayGainFallback;
 
@@ -112,7 +115,7 @@ class guMediaCtrl : public wxEvtHandler
 
     bool            IsBuffering( void ) { return ( m_CurrentPlayBin && m_CurrentPlayBin->IsBuffering() ); }
     int             BufferSize( void ) { return m_BufferSize; }
-    bool            IsRecording( void ) { return m_IsRecording; }
+    bool            IsRecording( void );
 
     bool            ForceGapless( void ) { return m_ForceGapless; }
     void            ForceGapless( const bool forcegapless ) { m_ForceGapless = forcegapless; }
@@ -156,6 +159,14 @@ class guMediaCtrl : public wxEvtHandler
     wxString        ProxyUser() const;
     wxString        ProxyPass() const;
     wxString        ProxyServer() const;
+
+    void            ToggleEqualizer();
+    void            ToggleVolCtl();
+
+    void            ReconfigureRG();
+
+    bool            IsEqualizerEnabled() { return m_CurrentPlayBin!= NULL ? m_CurrentPlayBin->IsEqualizerEnabled() : m_EnableEq; }
+    bool            IsVolCtlsEnabled() { return m_CurrentPlayBin!= NULL ? m_CurrentPlayBin->IsVolCtlsEnabled() : m_EnableEq; }
 
     friend class guFaderPlaybin;
 };
