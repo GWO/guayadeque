@@ -281,20 +281,17 @@ bool guCopyWithGio( const wxString &from, const wxString &to )
 // -------------------------------------------------------------------------------- //
 bool guCopyToThread::CopyFile( const wxString &from, const wxString &to )
 {
-    bool RetVal = true;
-    //guLogMessage( wxT( "Copy %s =>> %s" ), from.c_str(), to.c_str() );
-    if( wxFileName::Mkdir( wxPathOnly( to ), 0777, wxPATH_MKDIR_FULL ) )
+    bool RetVal = wxFileName::Mkdir( wxPathOnly( to ), 0777, wxPATH_MKDIR_FULL );
+    if( RetVal )
     {
         if( !wxCopyFile( from, to ) )
         {
-            RetVal = false;
-            guLogError( wxT( "Could not copy the file '%s'" ), from.c_str() );
-	    guCopyWithGio(from,to);
+            RetVal = guCopyWithGio(from,to);
+            if(!RetVal) guLogError( wxT( "Could not copy the file '%s'" ), from.c_str() );
         }
     }
     else
     {
-        RetVal = false;
         guLogError( wxT( "Could not create path for copy the file '%s'" ), from.c_str() );
     }
     return RetVal;
